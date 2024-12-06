@@ -25,9 +25,8 @@ defmodule Part1 do
         if found?, do: {:halt, {row, col}}, else: {:cont, {row, col}}
       end)
 
-    patrol(grid, [{y, x}, 0], MapSet.new([{y, x}]))
+    patrol(grid, [{y, x}, 0], MapSet.new([[{y, x}]]))
     |> MapSet.size()
-    |> Kernel.-(1)
   end
 
   defp patrol(grid, [{y, x}, direction], visited) do
