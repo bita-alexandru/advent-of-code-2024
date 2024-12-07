@@ -26,12 +26,15 @@ defmodule Part2 do
       curr_val == target
     else
       calib = Enum.at(calibs, i)
-      ok_plus? = evaluate(n, calibs, target, i + 1, curr_val + calib)
 
-      if !ok_plus? do
-        ok_mul? = evaluate(n, calibs, target, i + 1, curr_val * calib)
+      cond do
+        evaluate(n, calibs, target, i + 1, curr_val + calib) ->
+          true
 
-        if !ok_mul? do
+        evaluate(n, calibs, target, i + 1, curr_val * calib) ->
+          true
+
+        true ->
           evaluate(
             n,
             calibs,
@@ -39,11 +42,6 @@ defmodule Part2 do
             i + 1,
             (Integer.to_string(curr_val) <> Integer.to_string(calib)) |> String.to_integer()
           )
-        else
-          ok_mul?
-        end
-      else
-        ok_plus?
       end
     end
   end

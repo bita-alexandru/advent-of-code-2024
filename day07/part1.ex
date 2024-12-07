@@ -25,8 +25,14 @@ defmodule Part1 do
       curr_val == target
     else
       calib = Enum.at(calibs, i)
-      ok? = evaluate(n, calibs, target, i + 1, curr_val + calib)
-      if !ok?, do: evaluate(n, calibs, target, i + 1, curr_val * calib), else: ok?
+
+      cond do
+        evaluate(n, calibs, target, i + 1, curr_val + calib) ->
+          true
+
+        true ->
+          evaluate(n, calibs, target, i + 1, curr_val * calib)
+      end
     end
   end
 end
