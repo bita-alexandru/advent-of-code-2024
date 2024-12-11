@@ -10,34 +10,31 @@ defmodule Part2 do
     stones_after_blinks =
       1..75
       |> Enum.reduce(stones, fn _blink, acc_stones ->
-        curr_acc =
-          acc_stones
-          |> Enum.reduce(Map.new(), fn {stone, count}, acc ->
-            cond do
-              stone == 0 ->
-                Map.update(acc, 1, count, &(&1 + count))
+        acc_stones
+        |> Enum.reduce(Map.new(), fn {stone, count}, acc ->
+          cond do
+            stone == 0 ->
+              Map.update(acc, 1, count, &(&1 + count))
 
-              stone |> Integer.to_string() |> String.length() |> rem(2) == 0 ->
-                stone_str = stone |> Integer.to_string()
-                stone_str_mid = stone_str |> String.length() |> div(2)
+            stone |> Integer.to_string() |> String.length() |> rem(2) == 0 ->
+              stone_str = stone |> Integer.to_string()
+              stone_str_mid = stone_str |> String.length() |> div(2)
 
-                [left_half, right_half] = [
-                  stone_str |> String.slice(0..(stone_str_mid - 1)) |> String.to_integer(),
-                  stone_str
-                  |> String.slice(stone_str_mid..(stone_str_mid * 2))
-                  |> String.to_integer()
-                ]
+              [left_half, right_half] = [
+                stone_str |> String.slice(0..(stone_str_mid - 1)) |> String.to_integer(),
+                stone_str
+                |> String.slice(stone_str_mid..(stone_str_mid * 2))
+                |> String.to_integer()
+              ]
 
-                acc
-                |> Map.update(left_half, count, &(&1 + count))
-                |> Map.update(right_half, count, &(&1 + count))
+              acc
+              |> Map.update(left_half, count, &(&1 + count))
+              |> Map.update(right_half, count, &(&1 + count))
 
-              true ->
-                Map.update(acc, stone * 2024, count, &(&1 + count))
-            end
-          end)
-
-        curr_acc
+            true ->
+              Map.update(acc, stone * 2024, count, &(&1 + count))
+          end
+        end)
       end)
 
     stones_after_blinks
