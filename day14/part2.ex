@@ -44,49 +44,44 @@ defmodule Part2 do
         |> Map.put(i, {{y, x}, {vy, vx}})
       end)
 
-    final_map =
-      1..100_000
-      |> Enum.reduce(initial_map, fn second, acc_second ->
-        File.write("output.txt", "\nsecond #{second}\n", [:append])
+    1..100_000
+    |> Enum.reduce_while({MapSet.new(), initial_map, [0, :infinity]}, fn second,
+                                                                         {acc_maps_mapset,
+                                                                          acc_map,
+                                                                          [
+                                                                            acc_min_idx,
+                                                                            acc_min_val
+                                                                          ]} ->
+      curr_map =
+        acc_map
+        |> Enum.reduce(acc_map, fn {i, {{y, x}, {vy, vx}}}, acc ->
+          {ny, nx} = {(y + vy + nrows) |> rem(nrows), (x + vx + ncols) |> rem(ncols)}
 
-        x =
-          acc_second
-          |> Enum.reduce(acc_second, fn {i, {{y, x}, {vy, vx}}}, acc ->
-            {ny, nx} = {(y + vy + nrows) |> rem(nrows), (x + vx + ncols) |> rem(ncols)}
-
-            acc
-            |> Map.update!(i, fn _ -> {{ny, nx}, {vy, vx}} end)
-          end)
-
-        0..(hrows - 1)
-        |> Enum.each(fn i ->
-          0..(hcols - 1)
-          |> Enum.each(fn j ->
-            robots_ij =
-              Map.filter(x, fn {k, {pos, _}} -> pos == {i, j} end) |> map_size()
-
-            if robots_ij > 0,
-              do: File.write("output.txt", "#{robots_ij}", [:append]),
-              else: File.write("output.txt", ".", [:append])
-          end)
-
-          File.write("output.txt", "\n", [:append])
+          acc
+          |> Map.update!(i, fn _ -> {{ny, nx}, {vy, vx}} end)
         end)
 
-        x
-      end)
+      {q1, q2, q3, q4} = {
+        curr_map |> Map.filter(fn {_, {{y, x}, _}} -> y < hrows and x < hcols end),
+        curr_map |> Map.filter(fn {_, {{y, x}, _}} -> y < hrows and x > hcols end),
+        curr_map |> Map.filter(fn {_, {{y, x}, _}} -> y > hrows and x < hcols end),
+        curr_map |> Map.filter(fn {_, {{y, x}, _}} -> y > hrows and x > hcols end)
+      }
 
-    {q1, q2, q3, q4} = {
-      final_map |> Map.filter(fn {_, {{y, x}, _}} -> y < hrows and x < hcols end),
-      final_map |> Map.filter(fn {_, {{y, x}, _}} -> y < hrows and x > hcols end),
-      final_map |> Map.filter(fn {_, {{y, x}, _}} -> y > hrows and x < hcols end),
-      final_map |> Map.filter(fn {_, {{y, x}, _}} -> y > hrows and x > hcols end)
-    }
+      curr_safety =
+        for q <- [q1, q2, q3, q4] do
+          q
+          |> map_size()
+        end
+        |> Enum.product()
 
-    for q <- [q1, q2, q3, q4] do
-      q
-      |> map_size()
-    end
-    |> Enum.product()
+      if MapSet.member?(acc_maps_mapset, curr_map) do
+        {:halt, acc_min_idx}
+      else
+        min_safety = min(curr_safety, acc_min_val)
+        min_idx = if min_safety == curr_safety, do: second, else: acc_min_idx
+        {:cont, {MapSet.put(acc_maps_mapset, curr_map), curr_map, [min_idx, min_safety]}}
+      end
+    end)
   end
 end
