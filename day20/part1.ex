@@ -32,11 +32,11 @@ defmodule Part1 do
     distances = explore_grid(unvisited_map, unvisited_pq, end_pos, Map.new())
     path = get_path(end_pos, start_pos, distances, [end_pos])
 
-    cheats = get_cheats(grid, path)
+    cheats = get_cheats(path)
     cheats |> Enum.filter(fn val -> val >= 100 end) |> length()
   end
 
-  defp get_cheats(grid, path) do
+  defp get_cheats(path) do
     directions = [[1, 0], [0, 1], [-1, 0], [0, -1]]
     path_ms = MapSet.new(path)
 
@@ -44,37 +44,24 @@ defmodule Part1 do
     |> Enum.flat_map(fn yx ->
       {y, x} = yx
 
-      walls_1 =
-        directions
-        |> Enum.flat_map(fn [dy, dx] ->
-          nynx = {y + dy, x + dx}
-
-          if Map.get(grid, nynx) == "#" do
-            [nynx]
-          else
-            []
-          end
-        end)
-
-      frees_1 =
-        walls_1
-        |> Enum.flat_map(fn {wy, wx} ->
+      frees =
+        1..2
+        |> Enum.flat_map(fn i ->
           directions
           |> Enum.flat_map(fn [dy, dx] ->
-            nynx = {wy + dy, wx + dx}
+            nynx = {y + i*dy, x + i*dx}
 
             if MapSet.member?(path_ms, nynx) do
-              [nynx]
+              [{nynx, i}]
             else
               []
             end
           end)
         end)
-        |> Enum.uniq()
 
-      frees_1
-      |> Enum.map(fn fyfx ->
-        Enum.find_index(path, &(&1 == fyfx)) - Enum.find_index(path, &(&1 == yx)) - 2
+      frees
+      |> Enum.map(fn {fyfx, ps} ->
+        Enum.find_index(path, &(&1 == fyfx)) - Enum.find_index(path, &(&1 == yx)) - ps
       end)
     end)
   end
