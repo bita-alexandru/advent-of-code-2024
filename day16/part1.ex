@@ -133,7 +133,7 @@ defmodule Part1 do
 
         new_visited_map =
           visited_map
-          |> Map.update(curr_pos, curr_dist, fn _ -> curr_dir end)
+          |> Map.update(curr_pos, curr_dist, fn prev_dist -> min(curr_dist, prev_dist) end)
 
         explore_grid(
           new_unvisited_map,
