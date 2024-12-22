@@ -49,7 +49,7 @@ defmodule Part1 do
         |> Enum.flat_map(fn i ->
           directions
           |> Enum.flat_map(fn [dy, dx] ->
-            nynx = {y + i*dy, x + i*dx}
+            nynx = {y + i * dy, x + i * dx}
 
             if MapSet.member?(path_ms, nynx) do
               [{nynx, i}]
@@ -141,6 +141,16 @@ defmodule Part1 do
             else
               {acc_univisited_map, acc_univisited_pq}
             end
+          end)
+          |> then(fn {left, right} ->
+            {
+              left,
+              right
+              |> Enum.reject(fn {dist, yx} ->
+                yx == curr_pos and dist == curr_dist
+              end)
+              |> Enum.sort()
+            }
           end)
 
         new_visited_map =
